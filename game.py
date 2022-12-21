@@ -64,7 +64,6 @@ class Ground(pygame.sprite.Sprite):
         self.rect.top = screen_size[1]-self.rect.height
 
 class State:
-
     def handle(self,event):
         if event.type == QUIT:
             sys.exit()
@@ -79,7 +78,6 @@ class State:
         pass
 
 class Level(State):
-
     def __init__(self):
         pygame.mixer.music.unpause()
         self.firstTurtle = Turtle()
@@ -120,7 +118,7 @@ class Level(State):
             if self.turtlelst[-1].collide(self.turtlelst[-2]) and not self.turtlelst[-1].frozen:
                 self.turtlelst[-1].freeze()
                 self.turtlelst[-1].placeAfterCollide(self.turtlelst[-2])
-                if self.turtlelst[-1].rect.width > self.turtlelst[-2].rect.width: # GO DIE MOTHERFUCKER
+                if self.turtlelst[-1].rect.width > self.turtlelst[-2].rect.width: # GAME OVER
                     nextstate = GameOver(self.score)
                     game.nextState = nextstate
                 else: # CONTINUE
@@ -335,94 +333,3 @@ class Game:
 if __name__ == '__main__':
     game = Game()
     game.run()
-
-
-'''
-
-font1 = pygame.font.Font('font.ttf',100)#pygame.font.SysFont('droidsansfallback', 50)
-
-
-
-turtle_image = pygame.image.load('turtle.png')
-turtle_image = turtle_image.convert()
-ground_image = pygame.image.load('turtle.png')
-ground_image  =ground_image.convert()
-
-pygame.mixer.init(frequency=22050, size=-16, channels=2, buffer=512)
-pygame.mixer.music.load("bgm.mp3")
-pygame.mixer.music.play(-1)
-touchsound = pygame.mixer.Sound("touch.wav")
-pygame.time.Clock().tick(60)
-if __name__ == '__main__':
-    game = Game()
-    game.run()
-
-turtle = Turtle()
-ground = Ground()
-turtlelst = []
-
-turtlelst.append(turtle)
-sprites = pygame.sprite.RenderUpdates()
-sprites.add(turtlelst)
-sprites.add(ground)
-
-screen = pygame.display.get_surface()
-bg = (255,255,255)
-screen.fill(bg)
-pygame.display.flip()
-
-def clear_callback(surf,rect):
-    surf.fill(bg,rect)
-
-while True:
-    for event in pygame.event.get():
-        if event.type == QUIT:
-            sys.exit()
-        if event.type == KEYDOWN and event.key == K_ESCAPE:
-            sys.exit()
-        if event.type == KEYDOWN and event.key == K_SPACE:
-            touchsound.play()
-            turtlelst[-1].drop_flag = True
-
-    if turtle.collide(ground) and not turtle.frozen:
-        turtle.freeze()
-        turtle.placeAfterCollide(ground)
-        turtlelst.append(Turtle())
-        sprites.add(turtlelst[-1])
-
-    if turtlelst[-1] != turtle:
-        if turtlelst[-1].collide(turtlelst[-2]) and not turtlelst[-1].frozen:
-            turtlelst[-1].freeze()
-            turtlelst[-1].placeAfterCollide(turtlelst[-2])
-            if turtlelst[-1].rect.width > turtlelst[-2].rect.width: # GO DIE
-                break
-            else: # CONTINUE
-                eps = (turtlelst[-2].rect.width - turtlelst[-1].rect.width)/turtlelst[-2].rect.width
-                if eps<0.1:
-                    text=font1.render("太给力了",True,(0,0,0),(255,255,255))
-                    if eps<0.05:
-                        text=font1.render("真是神准",True,(0,0,0),(255,255,255))
-                    height = font1.get_linesize()
-                    center,top = screen.get_rect().center
-                    top-= height
-                    r=text.get_rect()
-                    r.midtop = center,top
-                    #sprites.clear(screen,clear_callback)
-                    sprites.update()
-                    updates = sprites.draw(screen)
-                    screen.blit(text,r)
-                    pygame.display.update()
-                    pygame.time.delay(1000)
-                    text=font1.render("                 ",True,(0,0,0),(255,255,255))
-                    screen.blit(text,r)
-                    pygame.display.update()
-                
-                turtlelst.append(Turtle())
-                sprites.add(turtlelst[-1])
-
-    sprites.clear(screen,clear_callback)
-    sprites.update()
-    pygame.time.Clock().tick(60)
-    updates = sprites.draw(screen)
-    pygame.display.update(updates)
-'''
