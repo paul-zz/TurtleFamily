@@ -1,0 +1,16 @@
+fonts:
+  - bigfont : ["./assets/fonts/font.ttf", 100]
+images:
+  - turtle : "./assets/images/turtle.png"
+  - ground : "./assets/images/ground.png"
+  - background : "./assets/images/bg.png"
+sounds:
+  - niceshot_1 : "./assets/sounds/liupi.wav"
+  - niceshot_2 : "./assets/sounds/666.wav"
+  - newbest : "./assets/sounds/newbest.wav"
+  - ready : "./assets/sounds/ready.wav"
+  - letsplay : "./assets/sounds/letsplay.wav"
+  - bgm : "./assets/sounds/bgm.mp3"
+  - fail : "./assets/sounds/dededon.wav"
+  - touch : "./assets/sounds/touch.wav"
+  
