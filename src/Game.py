@@ -5,7 +5,7 @@ import src.AssetsLoader
 class Game:
     def __init__(self):
         self.state = None
-        self.nextState = src.States.Homepage()
+        self.nextState = None
         self.highscore = 0
 
     def setHighScore(self, highscore : int):
@@ -26,13 +26,9 @@ class Game:
         assets = src.AssetsLoader.AssetsLoader()
         assets.loadAllFromList("./assets/assetslist.yaml")
 
-        bg = assets.getImage("background")
-        bg = bg.convert()
-        bg = pygame.transform.scale(bg,(screen_size[0],screen_size[1]))
         pygame.mouse.set_visible(1)
         pygame.display.set_caption('Turtle Family')
         
-
         #sound initiation
         pygame.mixer.init(frequency=22050, size=-16, channels=2, buffer=512)
         pygame.mixer.music.load("./assets/sounds/bgm.mp3")
@@ -40,17 +36,17 @@ class Game:
         pygame.mixer.music.play(-1)
 
         #FPS initiation
-        pygame.time.Clock().tick(60)
-
-        #highscore initiation
-        # TODO : highscore implementation without using global variables
-
+        clock = pygame.time.Clock() 
+        rate = 60
+        # Next state 
+        self.nextState = src.States.Homepage(screen, assets)
         #Main loop
-        while True:
+        while 1:
             if self.state != self.nextState:
                 self.state = self.nextState
                 self.state.firstDisplay(screen, assets)
             for event in pygame.event.get():
                 self.state.handle(event)
-            self.state.update(self, screen, assets)
+            self.state.update(self)
             self.state.display(screen)
+            clock.tick(rate)
