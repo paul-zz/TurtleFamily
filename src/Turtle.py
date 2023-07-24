@@ -3,6 +3,18 @@ import math
 import random
 
 class Turtle(pygame.sprite.Sprite):
+
+    @staticmethod
+    def makeScaleDict():
+        # Make a list to store the scale corresponding to the status
+        # to prevent re-calculation
+        scaleList = []
+        for status in range(0, 21):
+            scaleList.append(1.5*math.cos(3.14/2.5*status/20))
+        return scaleList
+
+    scaleDict = makeScaleDict()
+
     def __init__(self, image, screen):
         pygame.sprite.Sprite.__init__(self)
         self.image_source = image
@@ -14,12 +26,12 @@ class Turtle(pygame.sprite.Sprite):
         self.initial_rect_height = self.rect.height
         self.speed = 10
         self.addspeed = 2
-        self.status = random.random() # 初始状态，介于0-1之间
+        self.status = random.randint(0, 19) # 初始状态，介于0-1之间
         self.scale_big_flag = True # 决定放大还是缩小
         self.drop_flag = False # 决定是否下落
         self.frozen = False # 为True时将冻结
         self.reset()
-
+    
     def reset(self):
         self.speed = 5
         self.rect.top = -self.rect.height + 100
@@ -39,20 +51,18 @@ class Turtle(pygame.sprite.Sprite):
             if self.drop_flag:
                 self.rect.top += self.speed
                 self.speed += self.addspeed
-                if self.rect.top > self.screen_size[1]:
-                    self.reset()
             else:
                 if self.scale_big_flag:
-                    self.status += 0.05
+                    self.status += 1
                 else:
-                    self.status -= 0.05
+                    self.status -= 1
                 
-                if self.status>1:
+                if self.status >= 19:
                     self.scale_big_flag = False
-                elif self.status<0:
+                elif self.status <= 0:
                     self.scale_big_flag = True
 
-                self.scale = 1.5*math.cos(3.14/2.5*self.status)
-                self.image = pygame.transform.scale(self.image_source,(int(self.initial_rect_width*self.scale),int(self.initial_rect_height*self.scale)))
+                self.scale = Turtle.scaleDict[self.status]
+                self.image = pygame.transform.scale(self.image_source, (int(self.initial_rect_width*self.scale), int(self.initial_rect_height*self.scale)))
                 self.rect = self.image.get_rect()
                 self.rect.centerx = self.screen_size[0]/2
