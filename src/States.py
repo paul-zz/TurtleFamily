@@ -29,31 +29,33 @@ class Paused(State):
         if event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.KEYDOWN:
             self.finished = 1
 
-    def update(self, game, screen, assets):
-        if self.finished:
-            game.nextState = self.nextState(screen, assets)
+    def update(self, game):
+        pass
 
 
 class Level(State):
     def __init__(self, screen, assets):
         pygame.mixer.music.unpause()
         self.screen = screen
+        self.screen_size = self.screen.get_size()
         self.assets = assets
         self.firstTurtle = Turtle(self.assets.getImage("turtle"), self.screen)
         self.turtlelst = []
         self.turtlelst.append(self.firstTurtle)
         self.sprites = pygame.sprite.RenderUpdates()
-        self.ground = Ground(self.assets.getImage("ground"), self.screen.get_size()[0], 50, self.screen.get_size()[1] - 50)
+        self.ground = Ground(self.assets.getImage("ground"), self.screen_size[0], 50, self.screen_size[1] - 50)
         self.sprites.add(self.firstTurtle)
         self.sprites.add(self.ground)
         self.score = 0
         self.layer = 0
 
         self.bg = assets.getImage("background")
+        self.turtle_img = assets.getImage("turtle")
         self.touchsound = assets.getSound("touch")
         self.niceshot_1 = assets.getSound("niceshot_1")
         self.niceshot_2 = assets.getSound("niceshot_2")
 
+        self.score_font = self.assets.getFont("score_font")
         self.font1 = assets.getFont("bigfont")
 
     def handle(self,event):
@@ -63,20 +65,18 @@ class Level(State):
             self.touchsound.play()
             self.turtlelst[-1].drop_flag = True
 
-    def update(self, game, screen, assets):
+    def update(self, game):
         self.sprites.update()
-        score_font = self.assets.getFont("score_font")
-        score_text = score_font.render("得分:" + str(self.score), True, (0,0,0))
-        # TODO: Implement Highscore System
-        highscore_text = score_font.render("最高分:" + str(game.getHighScore()), True, (0,0,0))
+        score_text = self.score_font.render("得分:" + str(self.score), True, (0,0,0))
+        highscore_text = self.score_font.render("最高分:" + str(game.getHighScore()), True, (0,0,0))
         self.screen.blit(score_text,(5,5))
-        self.screen.blit(highscore_text,(self.screen.get_size()[0]-100,5))
+        self.screen.blit(highscore_text,(self.screen_size[0]-100,5))
         pygame.display.update()
         
         if self.firstTurtle.collide(self.ground) and not self.firstTurtle.frozen:
             self.firstTurtle.freeze()
             self.firstTurtle.placeAfterCollide(self.ground)
-            self.turtlelst.append(Turtle(self.assets.getImage("turtle"), self.screen))
+            self.turtlelst.append(Turtle(self.turtle_img, self.screen))
             self.sprites.add(self.turtlelst[-1])
             self.score += 1
             self.layer += 1
@@ -86,7 +86,7 @@ class Level(State):
                 self.turtlelst[-1].freeze()
                 self.turtlelst[-1].placeAfterCollide(self.turtlelst[-2])
                 if self.turtlelst[-1].rect.width > self.turtlelst[-2].rect.width: # GAME OVER
-                    nextstate = GameOver(self.score, game, assets)
+                    nextstate = GameOver(self.score, game, self.screen, self.assets)
                     game.nextState = nextstate
                 else: # CONTINUE
                     self.score += self.layer
@@ -112,27 +112,27 @@ class Level(State):
                         updates = self.sprites.draw(self.screen)
                         self.screen.blit(text,r)
                         self.screen.blit(score_text,(5,5))
-                        self.screen.blit(highscore_text,(self.screen.get_size()[0]-100,5))
+                        self.screen.blit(highscore_text,(self.screen_size[0]-100,5))
                         pygame.display.update()
                         pygame.time.delay(1000)
                         self.screen.blit(self.bg,(0,0))#screen.fill(bg)
                         updates = self.sprites.draw(self.screen)
                         pygame.display.update(updates)
                         pygame.display.update()
-                    self.turtlelst.append(Turtle(self.assets.getImage("turtle"), self.screen))
+                    self.turtlelst.append(Turtle(self.turtle_img, self.screen))
                     self.sprites.add(self.turtlelst[-1])
     
     def display(self, screen):
         screen.blit(self.bg,(0,0))#screen.fill(bg)
         updates = self.sprites.draw(screen)
         pygame.display.update(updates)
-        pygame.time.Clock().tick(75)
+        
 
 class Instruction(Paused):
-    nextState = Level
 
     def __init__(self, screen, assets):
         self.screen = screen
+        self.assets = assets
         self.center, self.top = screen.get_rect().center
 
     def firstDisplay(self, screen, assets):
@@ -165,14 +165,18 @@ class Instruction(Paused):
             audio.play()
         # Delay time to display the instruction page
         pygame.time.delay(delay)
+    
+    def update(self, game):
+        if self.finished:
+            game.nextState = Level(self.screen, self.assets)
 
 
 class GameOver(Paused):
-    nextState = Level
 
-    def __init__(self, score, game, assets):
+    def __init__(self, score, game, screen, assets):
         self.score = score
         self.game = game
+        self.screen = screen
         self.assets = assets
 
         self.sound_fail = assets.getSound("fail")
@@ -204,7 +208,7 @@ class GameOver(Paused):
             r = line.get_rect()
             r.midtop = center,top
         font = assets.getFont("midfont")
-        text = font.render('得分：'+str(self.score),1,(255,255,255))
+        text = font.render('得分：' + str(self.score), 1, (255,255,255))
         top = r.top + r.height + 10
         center = r.center[0]
         r2 = text.get_rect()
@@ -213,9 +217,15 @@ class GameOver(Paused):
         screen.blit(text, r2)
         pygame.display.flip()
 
+    def update(self, game):
+        if self.finished:
+            game.nextState = Level(self.screen, self.assets)
+
 
 class Homepage(Paused):
-    nextState = Instruction
+    def __init__(self, screen, assets):
+        self.screen = screen
+        self.assets = assets
 
     def firstDisplay(self, screen, assets):
         self.bg = assets.getImage("background")
@@ -224,8 +234,12 @@ class Homepage(Paused):
         height = self.font.get_linesize()
         center, top = screen.get_rect().center
         top -= height // 2
-        line = self.font.render('乌龟家族',1,(0,0,0))
+        line = self.font.render('乌龟家族', 1, (0, 0, 0))
         r = line.get_rect()
         r.midtop = center, top
         screen.blit(line, r)
         pygame.display.flip()
+
+    def update(self, game):
+        if self.finished:
+            game.nextState = Instruction(self.screen, self.assets)
