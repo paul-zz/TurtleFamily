@@ -1,5 +1,8 @@
 fonts:
   - bigfont : ["./assets/fonts/font.ttf", 100]
+  - midfont : ["./assets/fonts/font.ttf", 50]
+  - instruction_font : ["./assets/fonts/font.ttf", 80]
+  - score_font : ["./assets/fonts/font.ttf", 20]
 images:
   - turtle : "./assets/images/turtle.png"
   - ground : "./assets/images/ground.png"
