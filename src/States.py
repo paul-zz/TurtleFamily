@@ -57,6 +57,10 @@ class Level(State):
 
         self.score_font = self.assets.getFont("score_font")
         self.font1 = assets.getFont("bigfont")
+        self.midfont = assets.getFont("midfont")
+
+        self.show_score_addition = False
+        self.time_end = 0
 
     def handle(self,event):
         if event.type== pygame.QUIT: 
@@ -80,37 +84,48 @@ class Level(State):
             self.sprites.add(self.turtlelst[-1])
             self.score += 1
             self.layer += 1
+            self.show_score_addition = True
+            self.time_end = pygame.time.get_ticks() + 500
 
         if self.turtlelst[-1] != self.firstTurtle:
             if self.turtlelst[-1].collide(self.turtlelst[-2]) and not self.turtlelst[-1].frozen:
                 self.turtlelst[-1].freeze()
                 self.turtlelst[-1].placeAfterCollide(self.turtlelst[-2])
-                if self.turtlelst[-1].rect.width > self.turtlelst[-2].rect.width: # GAME OVER
+                if self.turtlelst[-1].rect.width > self.turtlelst[-2].rect.width: 
+                    # GAME OVER
                     nextstate = GameOver(self.score, game, self.screen, self.assets)
                     game.nextState = nextstate
-                else: # CONTINUE
+                else: 
+                    # CONTINUE
                     self.score += self.layer
-                    self.layer += 1
+                    self.show_score_addition = True
+                    self.time_end = pygame.time.get_ticks() + 500
                     eps = (self.turtlelst[-2].rect.width - self.turtlelst[-1].rect.width)/self.turtlelst[-2].rect.width # error of the width between two turtles
                     if eps<0.1:
                         text=self.font1.render("太厉害了",True,(0,0,0))
                         sound = self.niceshot_2
-                        self.score += 5
+                        bonus = 5
                         if eps<0.05:
                             text=self.font1.render("真是神准",True,(0,0,0))
                             sound = self.niceshot_1
-                            self.score += 10
+                            bonus = 10
+                        self.score += bonus
+                        text_bonus = self.midfont.render(f"奖励{bonus}分！", True, (0,0,0))
                         sound.play()
-                        height = self.font1.get_linesize()
+                        # Get bounds to make the text centered
                         center,top = self.screen.get_rect().center
-                        top-= height
-                        r=text.get_rect()
-                        r.midtop = center,top
+                        height = self.font1.get_linesize()
+                        r = text.get_rect()
+                        r.midtop = center, top-height
+                        # Get bounds to make the text centered
+                        r2 = text_bonus.get_rect()
+                        r2.midtop = center, top
                         #sprites.clear(screen,clear_callback)
                         self.screen.blit(self.bg,(0,0))#screen.fill(bg)
                         self.sprites.update()
                         updates = self.sprites.draw(self.screen)
                         self.screen.blit(text,r)
+                        self.screen.blit(text_bonus,r2)
                         self.screen.blit(score_text,(5,5))
                         self.screen.blit(highscore_text,(self.screen_size[0]-100,5))
                         pygame.display.update()
@@ -119,8 +134,17 @@ class Level(State):
                         updates = self.sprites.draw(self.screen)
                         pygame.display.update(updates)
                         pygame.display.update()
+                    self.layer += 1
                     self.turtlelst.append(Turtle(self.turtle_img, self.screen))
                     self.sprites.add(self.turtlelst[-1])
+        
+        if self.show_score_addition:
+            if pygame.time.get_ticks() < self.time_end:
+                text = self.score_font.render("+ " + str(self.layer), True, (0,0,0))
+                self.screen.blit(text, (5, 30))
+                pygame.display.update()
+            else:
+                self.show_score_addition = False
     
     def display(self, screen):
         screen.blit(self.bg,(0,0))#screen.fill(bg)
