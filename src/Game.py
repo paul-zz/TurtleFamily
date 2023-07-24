@@ -38,6 +38,7 @@ class Game:
         #FPS initiation
         clock = pygame.time.Clock() 
         rate = 60
+
         # Next state 
         self.nextState = src.States.Homepage(screen, assets)
         #Main loop
