@@ -16,9 +16,13 @@ class AssetsLoader:
         # Load font from system font as pygame Font object
         self.font_dict[name] = pygame.font.SysFont(font_name, pointsize)
 
-    def loadImage(self, name : str,  image_dir : str):
+    def loadImage(self, name : str,  image_dir : str, mode : str = "alpha"):
         # Load image from local file as pygame image object
-        self.image_dict[name] = pygame.image.load(image_dir)
+        im = pygame.image.load(image_dir)
+        if mode == "alpha":
+            im.convert_alpha()
+        self.image_dict[name] = im
+    
 
     def loadSound(self, name : str, sound_dir : str):
         # Load sound from local file as pygame mixer sound object
@@ -33,7 +37,6 @@ class AssetsLoader:
             sound_list = asset_dict['sounds']
             for font in font_list:
                 for k, v in font.items():
-                    print(k, v[0], v[1])
                     self.loadFont(k, v[0], v[1])
             for image in image_list:
                 for k, v in image.items():
