@@ -3,6 +3,7 @@ import pygame
 
 from .Turtle import Turtle
 from .Ground import Ground
+from .AssetsLoader import AssetsLoader
 
 class State:
     def handle(self,event):
@@ -11,7 +12,7 @@ class State:
         if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
             sys.exit()
 
-    def firstDisplay(self, screen, assets):
+    def firstDisplay(self, screen):
         pass
         # screen.blit(bg,(0,0))
         # pygame.display.flip()
@@ -34,30 +35,29 @@ class Paused(State):
 
 
 class Level(State):
-    def __init__(self, screen, assets):
+    def __init__(self, screen):
         pygame.mixer.music.unpause()
         self.screen = screen
         self.screen_size = self.screen.get_size()
-        self.assets = assets
-        self.firstTurtle = Turtle(self.assets.getImage("turtle"), self.screen)
+        self.firstTurtle = Turtle(AssetsLoader.getImage("turtle"), self.screen)
         self.turtlelst = []
         self.turtlelst.append(self.firstTurtle)
         self.sprites = pygame.sprite.RenderUpdates()
-        self.ground = Ground(self.assets.getImage("ground"), self.screen_size[0], 50, self.screen_size[1] - 50)
+        self.ground = Ground(AssetsLoader.getImage("ground"), self.screen_size[0], 50, self.screen_size[1] - 50)
         self.sprites.add(self.firstTurtle)
         self.sprites.add(self.ground)
         self.score = 0
         self.layer = 0
 
-        self.bg = assets.getImage("background")
-        self.turtle_img = assets.getImage("turtle")
-        self.touchsound = assets.getSound("touch")
-        self.niceshot_1 = assets.getSound("niceshot_1")
-        self.niceshot_2 = assets.getSound("niceshot_2")
+        self.bg = AssetsLoader.getImage("background")
+        self.turtle_img = AssetsLoader.getImage("turtle")
+        self.touchsound = AssetsLoader.getSound("touch")
+        self.niceshot_1 = AssetsLoader.getSound("niceshot_1")
+        self.niceshot_2 = AssetsLoader.getSound("niceshot_2")
 
-        self.score_font = self.assets.getFont("score_font")
-        self.font1 = assets.getFont("bigfont")
-        self.midfont = assets.getFont("midfont")
+        self.score_font = AssetsLoader.getFont("score_font")
+        self.font1 = AssetsLoader.getFont("bigfont")
+        self.midfont = AssetsLoader.getFont("midfont")
 
         self.show_score_addition = False
         self.time_end = 0
@@ -93,7 +93,7 @@ class Level(State):
                 self.turtlelst[-1].placeAfterCollide(self.turtlelst[-2])
                 if self.turtlelst[-1].rect.width > self.turtlelst[-2].rect.width: 
                     # GAME OVER
-                    nextstate = GameOver(self.score, game, self.screen, self.assets)
+                    nextstate = GameOver(self.score, game, self.screen)
                     game.nextState = nextstate
                 else: 
                     # CONTINUE
@@ -154,17 +154,16 @@ class Level(State):
 
 class Instruction(Paused):
 
-    def __init__(self, screen, assets):
+    def __init__(self, screen):
         self.screen = screen
-        self.assets = assets
         self.center, self.top = screen.get_rect().center
 
-    def firstDisplay(self, screen, assets):
+    def firstDisplay(self, screen):
         # Load assets
-        self.bg = assets.getImage("background")
-        self.sound_letsplay = assets.getSound("letsplay")
-        self.sound_ready = assets.getSound("ready")
-        self.font = assets.getFont("instruction_font")
+        self.bg = AssetsLoader.getImage("background")
+        self.sound_letsplay = AssetsLoader.getSound("letsplay")
+        self.sound_ready = AssetsLoader.getSound("ready")
+        self.font = AssetsLoader.getFont("instruction_font")
         # Init display
         
         self.displayInstructionWithAudio(screen, self.bg, "不可以比下面的乌龟大哦", self.font, self.sound_letsplay, 1000, (0, 0, 0))
@@ -192,21 +191,20 @@ class Instruction(Paused):
     
     def update(self, game):
         if self.finished:
-            game.nextState = Level(self.screen, self.assets)
+            game.nextState = Level(self.screen)
 
 
 class GameOver(Paused):
 
-    def __init__(self, score, game, screen, assets):
+    def __init__(self, score, game, screen):
         self.score = score
         self.game = game
         self.screen = screen
-        self.assets = assets
 
-        self.sound_fail = assets.getSound("fail")
-        self.sound_newbest = assets.getSound("newbest")
+        self.sound_fail = AssetsLoader.getSound("fail")
+        self.sound_newbest = AssetsLoader.getSound("newbest")
 
-    def firstDisplay(self, screen, assets):
+    def firstDisplay(self, screen):
         # Update the highscore
         highscore = self.game.getHighScore()
         if self.score <= highscore or highscore==0:
@@ -214,7 +212,7 @@ class GameOver(Paused):
                 self.game.setHighScore(self.score)
             pygame.mixer.music.pause()
             self.sound_fail.play()
-            font = assets.getFont("bigfont")
+            font = AssetsLoader.getFont("bigfont")
             height = font.get_linesize()
             center,top = screen.get_rect().center
             top -= height//2
@@ -224,14 +222,14 @@ class GameOver(Paused):
         else:
             self.game.setHighScore(self.score)
             self.sound_newbest.play()
-            font = font = assets.getFont("bigfont")
+            font = font = AssetsLoader.getFont("bigfont")
             height = font.get_linesize()
             center,top = screen.get_rect().center
             top -= height//2
             line = font.render('新的记录！',1,(255,0,0))
             r = line.get_rect()
             r.midtop = center,top
-        font = assets.getFont("midfont")
+        font = AssetsLoader.getFont("midfont")
         text = font.render('得分：' + str(self.score), 1, (255,255,255))
         top = r.top + r.height + 10
         center = r.center[0]
@@ -243,17 +241,16 @@ class GameOver(Paused):
 
     def update(self, game):
         if self.finished:
-            game.nextState = Level(self.screen, self.assets)
+            game.nextState = Level(self.screen)
 
 
 class Homepage(Paused):
-    def __init__(self, screen, assets):
+    def __init__(self, screen):
         self.screen = screen
-        self.assets = assets
 
-    def firstDisplay(self, screen, assets):
-        self.bg = assets.getImage("background")
-        self.font = assets.getFont("bigfont")
+    def firstDisplay(self, screen):
+        self.bg = AssetsLoader.getImage("background")
+        self.font = AssetsLoader.getFont("bigfont")
         screen.blit(self.bg, (0, 0))
         height = self.font.get_linesize()
         center, top = screen.get_rect().center
@@ -266,4 +263,4 @@ class Homepage(Paused):
 
     def update(self, game):
         if self.finished:
-            game.nextState = Instruction(self.screen, self.assets)
+            game.nextState = Instruction(self.screen)

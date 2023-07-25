@@ -1,6 +1,6 @@
 import pygame
 import src.States
-import src.AssetsLoader
+from src.AssetsLoader import AssetsLoader
 
 class Game:
     def __init__(self):
@@ -23,8 +23,7 @@ class Game:
         screen = pygame.display.set_mode(screen_size)
 
         # Assets Initialization
-        assets = src.AssetsLoader.AssetsLoader()
-        assets.loadAllFromList("./assets/assetslist.yaml")
+        AssetsLoader.loadAllFromList("./assets/assetslist.yaml")
 
         pygame.mouse.set_visible(1)
         pygame.display.set_caption('Turtle Family')
@@ -40,12 +39,12 @@ class Game:
         rate = 60
 
         # Next state 
-        self.nextState = src.States.Homepage(screen, assets)
+        self.nextState = src.States.Homepage(screen)
         #Main loop
         while 1:
             if self.state != self.nextState:
                 self.state = self.nextState
-                self.state.firstDisplay(screen, assets)
+                self.state.firstDisplay(screen)
             for event in pygame.event.get():
                 self.state.handle(event)
             self.state.update(self)
