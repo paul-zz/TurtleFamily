@@ -17,8 +17,6 @@ class State:
         # screen.blit(bg,(0,0))
         # pygame.display.flip()
 
-    def display(self,screen):
-        pass
 
 class Paused(State):
     finished = 0
@@ -130,10 +128,6 @@ class Level(State):
                         self.screen.blit(highscore_text,(self.screen_size[0]-100,5))
                         pygame.display.update()
                         pygame.time.delay(1000)
-                        self.screen.blit(self.bg,(0,0))#screen.fill(bg)
-                        updates = self.sprites.draw(self.screen)
-                        pygame.display.update(updates)
-                        pygame.display.update()
                     self.layer += 1
                     self.turtlelst.append(Turtle(self.screen))
                     self.sprites.add(self.turtlelst[-1])
@@ -145,11 +139,10 @@ class Level(State):
                 pygame.display.update()
             else:
                 self.show_score_addition = False
-    
-    def display(self, screen):
-        screen.blit(self.bg,(0,0))#screen.fill(bg)
-        updates = self.sprites.draw(screen)
+        self.screen.blit(self.bg,(0,0))
+        updates = self.sprites.draw(self.screen)
         pygame.display.update(updates)
+    
         
 
 class Instruction(Paused):
