@@ -1,6 +1,7 @@
 import pygame
 import math
 import random
+from .AssetsLoader import AssetsLoader
 
 class Turtle(pygame.sprite.Sprite):
 
@@ -15,10 +16,10 @@ class Turtle(pygame.sprite.Sprite):
 
     scaleDict = makeScaleDict()
 
-    def __init__(self, image, screen):
+    def __init__(self, screen):
         pygame.sprite.Sprite.__init__(self)
-        self.image_source = image
-        self.image = image
+        self.image_source = AssetsLoader.getImage("turtle")
+        self.image = AssetsLoader.getImage("turtle")
         self.screen = screen
         self.screen_size = self.screen.get_size()
         self.rect = self.image.get_rect()

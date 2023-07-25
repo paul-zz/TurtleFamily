@@ -39,11 +39,11 @@ class Level(State):
         pygame.mixer.music.unpause()
         self.screen = screen
         self.screen_size = self.screen.get_size()
-        self.firstTurtle = Turtle(AssetsLoader.getImage("turtle"), self.screen)
+        self.firstTurtle = Turtle(self.screen)
         self.turtlelst = []
         self.turtlelst.append(self.firstTurtle)
         self.sprites = pygame.sprite.RenderUpdates()
-        self.ground = Ground(AssetsLoader.getImage("ground"), self.screen_size[0], 50, self.screen_size[1] - 50)
+        self.ground = Ground(self.screen_size[0], 50, self.screen_size[1] - 50)
         self.sprites.add(self.firstTurtle)
         self.sprites.add(self.ground)
         self.score = 0
@@ -80,7 +80,7 @@ class Level(State):
         if self.firstTurtle.collide(self.ground) and not self.firstTurtle.frozen:
             self.firstTurtle.freeze()
             self.firstTurtle.placeAfterCollide(self.ground)
-            self.turtlelst.append(Turtle(self.turtle_img, self.screen))
+            self.turtlelst.append(Turtle(self.screen))
             self.sprites.add(self.turtlelst[-1])
             self.score += 1
             self.layer += 1
@@ -135,7 +135,7 @@ class Level(State):
                         pygame.display.update(updates)
                         pygame.display.update()
                     self.layer += 1
-                    self.turtlelst.append(Turtle(self.turtle_img, self.screen))
+                    self.turtlelst.append(Turtle(self.screen))
                     self.sprites.add(self.turtlelst[-1])
         
         if self.show_score_addition:
