@@ -1,6 +1,21 @@
 import sys
+from typing import Optional, Union
 import pygame
+import pygame.freetype
+from pygame.surface import Surface
 import yaml
+
+class PygameFontAdapter(pygame.font.Font):
+    def __init__(self, freetype_font : pygame.freetype.Font):
+        self.freetype_font = freetype_font
+        self.freetype_size = freetype_font.size
+
+    def get_linesize(self) -> int:
+        return self.freetype_font.get_sized_height(self.freetype_size)
+    
+    def render(self, text: str | bytes | None, antialias: bool, color, background = None) -> Surface:
+        return self.freetype_font.render(text, color, background)[0]
+
 
 class AssetsLoader:
     def __init__(self):
@@ -10,7 +25,10 @@ class AssetsLoader:
 
     def loadFont(self, name : str, font_dir : str, pointsize : int):
         # Load font from local file as pygame Font object
-        self.font_dict[name] = pygame.font.Font(font_dir, pointsize)
+        if font_dir.endswith("ttf"):
+            self.font_dict[name] = pygame.font.Font(font_dir, pointsize)
+        elif font_dir.endswith("otf"):
+            self.font_dict[name] = PygameFontAdapter(pygame.freetype.Font(font_dir, pointsize))
 
     def loadSystemFont(self, name : str, font_name : str, pointsize : int):
         # Load font from system font as pygame Font object
@@ -45,11 +63,11 @@ class AssetsLoader:
                 for k, v in sound.items():
                     self.loadSound(k, v)
 
-    def getFont(self, name : str):
+    def getFont(self, name : str) -> pygame.font.Font:
         return self.font_dict[name]
     
-    def getImage(self, name : str):
+    def getImage(self, name : str) -> pygame.Surface:
         return self.image_dict[name]
     
-    def getSound(self, name : str):
+    def getSound(self, name : str) -> pygame.mixer.Sound:
         return self.sound_dict[name]
