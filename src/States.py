@@ -119,7 +119,7 @@ class Level(State):
                         r.midtop = center, top-height
                         # Get bounds to make the text centered
                         r2 = text_bonus.get_rect()
-                        r2.midtop = center, top
+                        r2.midtop = center, r.top + r.height + 10
                         #sprites.clear(screen,clear_callback)
                         self.screen.blit(self.bg,(0,0))#screen.fill(bg)
                         self.sprites.update()
