@@ -48,5 +48,4 @@ class Game:
             for event in pygame.event.get():
                 self.state.handle(event)
             self.state.update(self)
-            self.state.display(screen)
             clock.tick(rate)
