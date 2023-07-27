@@ -1,6 +1,7 @@
 import pygame
 import src.States
 from src.AssetsLoader import AssetsLoader
+from src.LocaleManager import LocaleManager
 
 class Game:
     def __init__(self):
@@ -24,6 +25,10 @@ class Game:
 
         # Assets Initialization
         AssetsLoader.loadAllFromList("./assets/assetslist.yaml")
+
+        # Locale Initialization
+        LocaleManager.loadAllFromList("./assets/locale.yaml")
+        LocaleManager.setLocale("zh-cn")
 
         pygame.mouse.set_visible(1)
         pygame.display.set_caption('Turtle Family')
