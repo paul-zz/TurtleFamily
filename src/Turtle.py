@@ -1,6 +1,7 @@
 import pygame
 import math
 import random
+from pygame.math import Vector2
 from .AssetsLoader import AssetsLoader
 
 class Turtle(pygame.sprite.Sprite):
@@ -47,6 +48,22 @@ class Turtle(pygame.sprite.Sprite):
     def placeAfterCollide(self,other):
         self.rect.top = other.rect.top - self.rect.height
 
+    def getPos(self):
+        # Get the current position of the sprite
+        # and return as a Vector2
+        return Vector2(self.rect.centerx, self.rect.centery)
+    
+    def setPos(self, pos : Vector2):
+        # Set the position of the sprite
+        self.rect.centerx = pos.x
+        self.rect.centery = pos.y
+
+    def applyOffset(self, offset : Vector2):
+        # Change the position of the current sprite by applying an
+        # offset of a specified Vector2
+        self.rect.centerx += offset.x
+        self.rect.centery += offset.y
+
     def update(self):
         if not self.frozen:
             if self.drop_flag:
@@ -67,3 +84,5 @@ class Turtle(pygame.sprite.Sprite):
                 self.image = pygame.transform.scale(self.image_source, (int(self.initial_rect_width*self.scale), int(self.initial_rect_height*self.scale)))
                 self.rect = self.image.get_rect()
                 self.rect.centerx = self.screen_size[0]/2
+
+    

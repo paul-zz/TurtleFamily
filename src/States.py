@@ -1,8 +1,10 @@
 import sys
 import pygame
+from pygame.math import Vector2
 
 from .Turtle import Turtle
 from .Ground import Ground
+from .Camera import Camera
 from .AssetsLoader import AssetsLoader
 
 class State:
@@ -57,6 +59,11 @@ class Level(State):
         self.font1 = AssetsLoader.getFont("bigfont")
         self.midfont = AssetsLoader.getFont("midfont")
 
+        self.start_camera_follow = False
+        self.camera = Camera(Vector2(self.screen_size[0]/2, self.screen_size[1]/2))
+        self.camera.addSprite(self.firstTurtle)
+        self.camera.addSprite(self.ground)
+
         self.show_score_addition = False
         self.time_end = 0
 
@@ -80,6 +87,7 @@ class Level(State):
             self.firstTurtle.placeAfterCollide(self.ground)
             self.turtlelst.append(Turtle(self.screen))
             self.sprites.add(self.turtlelst[-1])
+            self.camera.addSprite(self.turtlelst[-1])
             self.score += 1
             self.layer += 1
             self.show_score_addition = True
@@ -131,6 +139,7 @@ class Level(State):
                     self.layer += 1
                     self.turtlelst.append(Turtle(self.screen))
                     self.sprites.add(self.turtlelst[-1])
+                    self.camera.addSprite(self.turtlelst[-1])
         
         if self.show_score_addition:
             if pygame.time.get_ticks() < self.time_end:
@@ -139,6 +148,12 @@ class Level(State):
                 pygame.display.update()
             else:
                 self.show_score_addition = False
+        
+        if self.turtlelst[-1] != self.firstTurtle and self.turtlelst[-2].getPos().y < self.screen_size[1]/2:
+            # Start camera follow
+            self.camera.follow(self.turtlelst[-2])
+            print("Camera follow has been triggered!")
+        self.camera.updatePosition()
         self.screen.blit(self.bg,(0,0))
         updates = self.sprites.draw(self.screen)
         pygame.display.update(updates)
