@@ -265,21 +265,12 @@ class Homepage(State):
         self.bg = AssetsLoader.getImage("background")
 
     def firstDisplay(self, screen):
-        pass
-
-    def handle(self, event):
-        if event.type == pygame.QUIT:
-            sys.exit()
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-            sys.exit()
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-            self.finished = 1
-        selected_option = self.list1.update(event)
-        if selected_option >=0:
-            LocaleManager.setLocale(self.list1.option_list[selected_option])
-
-    def update(self, game):
-        # Clear the background
+        # Display only once when the state is created
+        self.refreshOnce()
+    
+    def refreshOnce(self):
+        # Function to refresh the titles once
+        # Trigger only when the titles are changed
         self.screen.blit(self.bg, (0, 0))
         # Draw the title
         height = self.font_big.get_linesize()
@@ -296,8 +287,26 @@ class Homepage(State):
         r2 = text.get_rect()
         r2.midtop = center,top
         self.screen.blit(text, r2)
-
         self.list1.draw(self.screen)
-        pygame.display.flip()
+        pygame.display.update()
+
+    def handle(self, event):
+        if event.type == pygame.QUIT:
+            sys.exit()
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+            sys.exit()
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+            self.finished = 1
+        selected_option = self.list1.update(event)
+        if selected_option >=0:
+            # Set locale and refresh the titles
+            LocaleManager.setLocale(self.list1.option_list[selected_option])
+            self.refreshOnce()
+
+    def update(self, game):
+        # Clear the background
+        self.screen.blit(self.bg, (0, 0))
+        updates = self.list1.draw(self.screen)
+        pygame.display.update(updates)
         if self.finished:
             game.nextState = Instruction(self.screen)
