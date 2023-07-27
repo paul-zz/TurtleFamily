@@ -1,2 +1,3 @@
-zh-cn: "./assets/locales/zh-cn.yaml"
-en-us: "./assets/locales/en-us.yaml"
+中文（简体）: "./assets/locales/zh-cn.yaml"
+中文（繁體）: "./assets/locales/zh-tw.yaml"
+English: "./assets/locales/en-us.yaml"
