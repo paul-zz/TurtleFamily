@@ -258,8 +258,8 @@ class Homepage(State):
         self.screen = screen
         self.finished = False
         self.list1 = OptionBox(
-    900, 40, 80, 30, (255, 255, 255), (100, 200, 255), AssetsLoader.getFont("score_font"), 
-    LocaleManager.getAllLocales())
+    880, 40, 100, 30, (255, 255, 255), (100, 200, 255), AssetsLoader.getFont("score_font"), 
+    LocaleManager.getAllNames())
         self.font_big = AssetsLoader.getFont("bigfont")
         self.font_mid = AssetsLoader.getFont("midfont")
         self.bg = AssetsLoader.getImage("background")
@@ -300,7 +300,7 @@ class Homepage(State):
         selected_option = self.list1.update(event)
         if selected_option >=0:
             # Set locale and refresh the titles
-            LocaleManager.setLocale(self.list1.option_list[selected_option])
+            LocaleManager.setLocale(selected_option)
             self.refreshOnce()
 
     def update(self, game):
