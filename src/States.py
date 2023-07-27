@@ -152,7 +152,6 @@ class Level(State):
         if self.turtlelst[-1] != self.firstTurtle and self.turtlelst[-2].getPos().y < self.screen_size[1]/2:
             # Start camera follow
             self.camera.follow(self.turtlelst[-2])
-            print("Camera follow has been triggered!")
         self.camera.updatePosition()
         self.screen.blit(self.bg,(0,0))
         updates = self.sprites.draw(self.screen)
