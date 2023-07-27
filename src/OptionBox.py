@@ -12,6 +12,7 @@ class OptionBox():
         self.color = color
         self.highlight_color = highlight_color
         self.rect = pygame.Rect(x, y, w, h)
+        self.outer_rect = None
         self.font = font
         self.option_list = option_list
         self.selected = selected
@@ -32,8 +33,10 @@ class OptionBox():
                 pygame.draw.rect(surf, self.highlight_color if i == self.active_option else self.color, rect)
                 msg = self.font.render(text, 1, (0, 0, 0))
                 surf.blit(msg, msg.get_rect(center = rect.center))
-            outer_rect = (self.rect.x, self.rect.y + self.rect.height, self.rect.width, self.rect.height * len(self.option_list))
-            pygame.draw.rect(surf, (0, 0, 0), outer_rect, 2)
+            self.outer_rect = (self.rect.x, self.rect.y + self.rect.height, self.rect.width, self.rect.height * len(self.option_list))
+            pygame.draw.rect(surf, (0, 0, 0), self.outer_rect, 2)
+        return [self.rect, self.outer_rect]
+       
 
     def update(self, event):
         mpos = pygame.mouse.get_pos()
