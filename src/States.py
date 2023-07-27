@@ -6,6 +6,8 @@ from .Turtle import Turtle
 from .Ground import Ground
 from .Camera import Camera
 from .AssetsLoader import AssetsLoader
+from .LocaleManager import LocaleManager
+from .OptionBox import OptionBox
 
 class State:
     def handle(self,event):
@@ -76,10 +78,10 @@ class Level(State):
 
     def update(self, game):
         self.sprites.update()
-        score_text = self.score_font.render("得分:" + str(self.score), True, (0,0,0))
-        highscore_text = self.score_font.render("最高分:" + str(game.getHighScore()), True, (0,0,0))
+        score_text = self.score_font.render(LocaleManager.getString("score") + str(self.score), True, (0,0,0))
+        highscore_text = self.score_font.render(LocaleManager.getString("highscore") + str(game.getHighScore()), True, (0,0,0))
         self.screen.blit(score_text,(5,5))
-        self.screen.blit(highscore_text,(self.screen_size[0]-100,5))
+        self.screen.blit(highscore_text,(self.screen_size[0]-highscore_text.get_rect().width-5,5))
         pygame.display.update()
         
         if self.firstTurtle.collide(self.ground) and not self.firstTurtle.frozen:
@@ -108,15 +110,15 @@ class Level(State):
                     self.time_end = pygame.time.get_ticks() + 500
                     eps = (self.turtlelst[-2].rect.width - self.turtlelst[-1].rect.width)/self.turtlelst[-2].rect.width # error of the width between two turtles
                     if eps<0.1:
-                        text=self.font1.render("太厉害了",True,(0,0,0))
+                        text=self.font1.render(LocaleManager.getString("niceshot_2"),True,(0,0,0))
                         sound = self.niceshot_2
                         bonus = 5
                         if eps<0.05:
-                            text=self.font1.render("真是神准",True,(0,0,0))
+                            text=self.font1.render(LocaleManager.getString("niceshot_1"),True,(0,0,0))
                             sound = self.niceshot_1
                             bonus = 10
                         self.score += bonus
-                        text_bonus = self.midfont.render(f"奖励{bonus}分！", True, (0,0,0))
+                        text_bonus = self.midfont.render(LocaleManager.getString("bonus")%bonus, True, (0,0,0))
                         sound.play()
                         # Get bounds to make the text centered
                         center,top = self.screen.get_rect().center
@@ -133,7 +135,7 @@ class Level(State):
                         self.screen.blit(text,r)
                         self.screen.blit(text_bonus,r2)
                         self.screen.blit(score_text,(5,5))
-                        self.screen.blit(highscore_text,(self.screen_size[0]-100,5))
+                        self.screen.blit(highscore_text,(self.screen_size[0]-highscore_text.get_rect().width-5,5))
                         pygame.display.update()
                         pygame.time.delay(1000)
                     self.layer += 1
@@ -173,9 +175,9 @@ class Instruction(Paused):
         self.font = AssetsLoader.getFont("instruction_font")
         # Init display
         
-        self.displayInstructionWithAudio(screen, self.bg, "不可以比下面的乌龟大哦", self.font, self.sound_letsplay, 1000, (0, 0, 0))
-        self.displayInstructionWithAudio(screen, self.bg, "Ready?", self.font, self.sound_ready, 500, (255, 0, 0))
-        self.displayInstructionWithAudio(screen, self.bg, "GO!", self.font, None, 500, (255, 0, 0))
+        self.displayInstructionWithAudio(screen, self.bg, LocaleManager.getString("instruction_1"), self.font, self.sound_letsplay, 1000, (0, 0, 0))
+        self.displayInstructionWithAudio(screen, self.bg, LocaleManager.getString("ready"), self.font, self.sound_ready, 500, (255, 0, 0))
+        self.displayInstructionWithAudio(screen, self.bg, LocaleManager.getString("go"), self.font, None, 500, (255, 0, 0))
         self.finished = 1
 
 
@@ -223,7 +225,7 @@ class GameOver(Paused):
             height = font.get_linesize()
             center,top = screen.get_rect().center
             top -= height//2
-            line = font.render('太可惜了',1,(255,0,0))
+            line = font.render(LocaleManager.getString("failure"),1,(255,0,0))
             r = line.get_rect()
             r.midtop = center,top
         else:
@@ -233,11 +235,11 @@ class GameOver(Paused):
             height = font.get_linesize()
             center,top = screen.get_rect().center
             top -= height//2
-            line = font.render('新的记录！',1,(255,0,0))
+            line = font.render(LocaleManager.getString("new_record"),1,(255,0,0))
             r = line.get_rect()
             r.midtop = center,top
         font = AssetsLoader.getFont("midfont")
-        text = font.render('得分：' + str(self.score), 1, (255,255,255))
+        text = font.render(LocaleManager.getString("end_score") + str(self.score), 1, (255,255,255))
         top = r.top + r.height + 10
         center = r.center[0]
         r2 = text.get_rect()
@@ -251,23 +253,51 @@ class GameOver(Paused):
             game.nextState = Level(self.screen)
 
 
-class Homepage(Paused):
+class Homepage(State):
     def __init__(self, screen):
         self.screen = screen
+        self.finished = False
+        self.list1 = OptionBox(
+    900, 40, 80, 30, (255, 255, 255), (100, 200, 255), AssetsLoader.getFont("score_font"), 
+    LocaleManager.getAllLocales())
+        self.font_big = AssetsLoader.getFont("bigfont")
+        self.font_mid = AssetsLoader.getFont("midfont")
+        self.bg = AssetsLoader.getImage("background")
 
     def firstDisplay(self, screen):
-        self.bg = AssetsLoader.getImage("background")
-        self.font = AssetsLoader.getFont("bigfont")
-        screen.blit(self.bg, (0, 0))
-        height = self.font.get_linesize()
-        center, top = screen.get_rect().center
-        top -= height // 2
-        line = self.font.render('乌龟家族', 1, (0, 0, 0))
-        r = line.get_rect()
-        r.midtop = center, top
-        screen.blit(line, r)
-        pygame.display.flip()
+        pass
+
+    def handle(self, event):
+        if event.type == pygame.QUIT:
+            sys.exit()
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+            sys.exit()
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+            self.finished = 1
+        selected_option = self.list1.update(event)
+        if selected_option >=0:
+            LocaleManager.setLocale(self.list1.option_list[selected_option])
 
     def update(self, game):
+        # Clear the background
+        self.screen.blit(self.bg, (0, 0))
+        # Draw the title
+        height = self.font_big.get_linesize()
+        center, top = self.screen.get_rect().center
+        top -= height // 2
+        line = self.font_big.render(LocaleManager.getString("title"), 1, (0, 0, 0))
+        r = line.get_rect()
+        r.midtop = center, top
+        self.screen.blit(line, r)
+        # Draw the subtitle
+        text = self.font_mid.render(LocaleManager.getString("press_continue"), 1, (0,0,0))
+        top = r.top + r.height + 10
+        center = r.center[0]
+        r2 = text.get_rect()
+        r2.midtop = center,top
+        self.screen.blit(text, r2)
+
+        self.list1.draw(self.screen)
+        pygame.display.flip()
         if self.finished:
             game.nextState = Instruction(self.screen)
