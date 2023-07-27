@@ -24,19 +24,32 @@ class OptionBox():
         pygame.draw.rect(surf, self.highlight_color if self.menu_active else self.color, self.rect)
         pygame.draw.rect(surf, (0, 0, 0), self.rect, 2)
         msg = self.font.render(self.option_list[self.selected], 1, (0, 0, 0))
+        if msg.get_width() > self.rect.width:
+            msg = self.squeeze_to_width(msg)
         surf.blit(msg, msg.get_rect(center = self.rect.center))
-
+        
         if self.draw_menu:
             for i, text in enumerate(self.option_list):
                 rect = self.rect.copy()
                 rect.y += (i+1) * self.rect.height
                 pygame.draw.rect(surf, self.highlight_color if i == self.active_option else self.color, rect)
                 msg = self.font.render(text, 1, (0, 0, 0))
+                if msg.get_width() > self.rect.width:
+                    msg = self.squeeze_to_width(msg)
                 surf.blit(msg, msg.get_rect(center = rect.center))
             self.outer_rect = (self.rect.x, self.rect.y + self.rect.height, self.rect.width, self.rect.height * len(self.option_list))
             pygame.draw.rect(surf, (0, 0, 0), self.outer_rect, 2)
         return [self.rect, self.outer_rect]
-       
+    
+    def fit_to_width(self, surf, proportion = 0.85):
+        # Fit the text to the same width of the rect
+        scale = proportion * self.rect.width / surf.get_width()
+        surf = pygame.transform.scale(surf, (surf.get_width() * scale, surf.get_height() * scale))
+        return surf
+    
+    def squeeze_to_width(self, surf, proportion = 0.85):
+        surf = pygame.transform.scale(surf, (self.rect.width * proportion, surf.get_height()))
+        return surf
 
     def update(self, event):
         mpos = pygame.mouse.get_pos()
