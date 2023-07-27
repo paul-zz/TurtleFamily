@@ -1,19 +1,24 @@
 import yaml
 
 class LocaleManager:
-    locale = "zh-cn"
-    fallback = "zh-cn"
+    locale_idx = 0
+    fallback_idx = 0
     locale_dict = {}
+    locale_names = []
 
-    def setLocale(locale_id : str):
-        # Set current locale to a locale identifier (e.g. zh-cn)
-        LocaleManager.locale = locale_id
+    def getLocaleName(locale_idx : int):
+        return LocaleManager.locale_names[locale_idx]
 
-    def loadLocale(locale_id : str,  locale_dir : str):
+    def setLocale(locale_idx : int):
+        # Set current locale by a given locale index according to the locale list(e.g. 0)
+        LocaleManager.locale_idx = locale_idx
+        print("Language set to " + LocaleManager.getLocaleName(locale_idx))
+
+    def loadLocale(locale_name : str,  locale_dir : str):
         # Load locale strings from local file
         with open(locale_dir, "r", encoding="utf-8") as f:
             lang_str_dict = yaml.safe_load(f)
-            LocaleManager.locale_dict[locale_id] = lang_str_dict
+            LocaleManager.locale_dict[locale_name] = lang_str_dict
 
     def loadAllFromList(locale_list_dir : str):
         # Load all locales
@@ -21,13 +26,17 @@ class LocaleManager:
             lang_dict = yaml.safe_load(f)
             for lang, lang_dir in lang_dict.items():
                 LocaleManager.loadLocale(lang, lang_dir)
+            LocaleManager.locale_names = list(LocaleManager.locale_dict.keys())
+
+    def getAllNames():
+        return LocaleManager.locale_names
 
     def getString(string_id : str):
         # Get string from the current locale
         try:
-            return LocaleManager.locale_dict[LocaleManager.locale][string_id]
+            return LocaleManager.locale_dict[LocaleManager.getLocaleName(LocaleManager.locale_idx)][string_id]
         except:
-            return LocaleManager.locale_dict[LocaleManager.fallback][string_id]
+            return LocaleManager.locale_dict[LocaleManager.getLocaleName(LocaleManager.fallback_idx)][string_id]
         
-    def getAllLocales():
-        return list(LocaleManager.locale_dict.keys())
+    
+    
