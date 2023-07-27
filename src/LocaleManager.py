@@ -12,7 +12,6 @@ class LocaleManager:
     def setLocale(locale_idx : int):
         # Set current locale by a given locale index according to the locale list(e.g. 0)
         LocaleManager.locale_idx = locale_idx
-        print("Language set to " + LocaleManager.getLocaleName(locale_idx))
 
     def loadLocale(locale_name : str,  locale_dir : str):
         # Load locale strings from local file
