@@ -263,6 +263,7 @@ class Homepage(State):
         self.font_big = AssetsLoader.getFont("bigfont")
         self.font_mid = AssetsLoader.getFont("midfont")
         self.bg = AssetsLoader.getImage("background")
+        self.icon_earth = AssetsLoader.getImage("icon_earth")
 
     def firstDisplay(self, screen):
         # Display only once when the state is created
@@ -272,6 +273,7 @@ class Homepage(State):
         # Function to refresh the titles once
         # Trigger only when the titles are changed
         self.screen.blit(self.bg, (0, 0))
+        self.screen.blit(self.icon_earth, (840, 39))
         # Draw the title
         height = self.font_big.get_linesize()
         center, top = self.screen.get_rect().center
