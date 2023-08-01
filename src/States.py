@@ -16,7 +16,7 @@ class State:
         if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
             sys.exit()
 
-    def firstDisplay(self, screen):
+    def firstDisplay(self, screen : pygame.Surface):
         pass
         # screen.blit(bg,(0,0))
         # pygame.display.flip()
@@ -37,7 +37,7 @@ class Paused(State):
 
 
 class Level(State):
-    def __init__(self, screen):
+    def __init__(self, screen : pygame.Surface):
         pygame.mixer.music.unpause()
         self.screen = screen
         self.screen_size = self.screen.get_size()
@@ -163,11 +163,11 @@ class Level(State):
 
 class Instruction(Paused):
 
-    def __init__(self, screen):
+    def __init__(self, screen : pygame.Surface):
         self.screen = screen
         self.center, self.top = screen.get_rect().center
 
-    def firstDisplay(self, screen):
+    def firstDisplay(self, screen : pygame.Surface):
         # Load assets
         self.bg = AssetsLoader.getImage("background")
         self.sound_letsplay = AssetsLoader.getSound("letsplay")
@@ -181,7 +181,14 @@ class Instruction(Paused):
         self.finished = 1
 
 
-    def displayInstructionWithAudio(self, screen, bg, text, font, audio, delay = 500, color = (0, 0, 0)):
+    def displayInstructionWithAudio(self, 
+                                    screen : pygame.Surface, 
+                                    bg : pygame.Surface, 
+                                    text : str, 
+                                    font : pygame.font.Font, 
+                                    audio : pygame.mixer.Sound, 
+                                    delay : int = 500, 
+                                    color : tuple[int, int, int] = (0, 0, 0)):
         # Fill the screen with bg color
         screen.blit(bg,(0, 0))
         # Render the line
@@ -205,7 +212,7 @@ class Instruction(Paused):
 
 class GameOver(Paused):
 
-    def __init__(self, score, game, screen):
+    def __init__(self, score : int, game, screen : pygame.Surface):
         self.score = score
         self.game = game
         self.screen = screen
@@ -213,7 +220,7 @@ class GameOver(Paused):
         self.sound_fail = AssetsLoader.getSound("fail")
         self.sound_newbest = AssetsLoader.getSound("newbest")
 
-    def firstDisplay(self, screen):
+    def firstDisplay(self, screen : pygame.Surface):
         # Update the highscore
         highscore = self.game.getHighScore()
         if self.score <= highscore or highscore==0:
@@ -254,7 +261,7 @@ class GameOver(Paused):
 
 
 class Homepage(State):
-    def __init__(self, screen):
+    def __init__(self, screen : pygame.Surface):
         self.screen = screen
         self.finished = False
         self.list1 = OptionBox(
@@ -265,7 +272,7 @@ class Homepage(State):
         self.bg = AssetsLoader.getImage("background")
         self.icon_earth = AssetsLoader.getImage("icon_earth")
 
-    def firstDisplay(self, screen):
+    def firstDisplay(self, screen : pygame.Surface):
         # Display only once when the state is created
         self.refreshOnce()
     

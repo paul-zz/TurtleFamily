@@ -17,7 +17,7 @@ class Turtle(pygame.sprite.Sprite):
 
     scaleDict = makeScaleDict()
 
-    def __init__(self, screen):
+    def __init__(self, screen : pygame.Surface):
         pygame.sprite.Sprite.__init__(self)
         self.image_source = AssetsLoader.getImage("turtle")
         self.image = AssetsLoader.getImage("turtle")
@@ -39,7 +39,7 @@ class Turtle(pygame.sprite.Sprite):
         self.rect.top = -self.rect.height + 100
         self.rect.centerx = self.screen_size[0]/2
     
-    def collide(self,other):
+    def collide(self, other):
         return self.rect.colliderect(other.rect)
 
     def freeze(self):
