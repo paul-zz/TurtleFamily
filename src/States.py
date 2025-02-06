@@ -77,12 +77,8 @@ class Level(State):
             self.turtlelst[-1].drop_flag = True
 
     def update(self, game):
+        # Update all sprites
         self.sprites.update()
-        score_text = self.score_font.render(LocaleManager.getString("score") + str(self.score), True, (0,0,0))
-        highscore_text = self.score_font.render(LocaleManager.getString("highscore") + str(game.getHighScore()), True, (0,0,0))
-        self.screen.blit(score_text,(5,5))
-        self.screen.blit(highscore_text,(self.screen_size[0]-highscore_text.get_rect().width-5,5))
-        pygame.display.update()
         
         if self.firstTurtle.collide(self.ground) and not self.firstTurtle.frozen:
             self.firstTurtle.freeze()
@@ -110,33 +106,36 @@ class Level(State):
                     self.time_end = pygame.time.get_ticks() + 500
                     eps = (self.turtlelst[-2].rect.width - self.turtlelst[-1].rect.width)/self.turtlelst[-2].rect.width # error of the width between two turtles
                     if eps<0.1:
-                        text=self.font1.render(LocaleManager.getString("niceshot_2"),True,(0,0,0))
-                        sound = self.niceshot_2
+                        bonus_banner_str = LocaleManager.getString("niceshot_2")
+                        bonus_sound = self.niceshot_2
                         bonus = 5
                         if eps<0.05:
-                            text=self.font1.render(LocaleManager.getString("niceshot_1"),True,(0,0,0))
-                            sound = self.niceshot_1
+                            bonus_banner_str = LocaleManager.getString("niceshot_1")
+                            bonus_sound = self.niceshot_1
                             bonus = 10
                         self.score += bonus
+                        # Play bonus sound
+                        bonus_sound.play()
+
+                        # Render bonus text
+                        text_bonus_banner = self.font1.render(bonus_banner_str,True,(0,0,0))
                         text_bonus = self.midfont.render(LocaleManager.getString("bonus")%bonus, True, (0,0,0))
-                        sound.play()
+
                         # Get bounds to make the text centered
                         center,top = self.screen.get_rect().center
                         height = self.font1.get_linesize()
-                        r = text.get_rect()
+                        r = text_bonus_banner.get_rect()
                         r.midtop = center, top-height
                         # Get bounds to make the text centered
                         r2 = text_bonus.get_rect()
                         r2.midtop = center, r.top + r.height + 10
-                        #sprites.clear(screen,clear_callback)
-                        self.screen.blit(self.bg,(0,0))#screen.fill(bg)
+
+                        self.screen.blit(self.bg,(0,0))
                         self.sprites.update()
                         updates = self.sprites.draw(self.screen)
-                        self.screen.blit(text,r)
-                        self.screen.blit(text_bonus,r2)
-                        self.screen.blit(score_text,(5,5))
-                        self.screen.blit(highscore_text,(self.screen_size[0]-highscore_text.get_rect().width-5,5))
-                        pygame.display.update()
+                        updates.append(self.screen.blit(text_bonus_banner,r))
+                        updates.append(self.screen.blit(text_bonus,r2))
+                        pygame.display.update(updates)
                         pygame.time.delay(1000)
                     self.layer += 1
                     self.turtlelst.append(Turtle(self.screen))
@@ -145,19 +144,30 @@ class Level(State):
         
         if self.show_score_addition:
             if pygame.time.get_ticks() < self.time_end:
-                text = self.score_font.render("+ " + str(self.layer), True, (0,0,0))
-                self.screen.blit(text, (5, 30))
-                pygame.display.update()
+                text_score_addition = self.score_font.render("+ " + str(self.layer), True, (0,0,0))
+                text_score_addition_update = self.screen.blit(text_score_addition, (5, 30))
+                pygame.display.update(text_score_addition_update)
             else:
                 self.show_score_addition = False
         
+        # Update Camera follow
         if self.turtlelst[-1] != self.firstTurtle and self.turtlelst[-2].getPos().y < self.screen_size[1]/2:
             # Start camera follow
             self.camera.follow(self.turtlelst[-2])
+            
         self.camera.updatePosition()
+
+        # Draw indicator
+        score_text = self.score_font.render(LocaleManager.getString("score") + str(self.score), True, (0,0,0))
+        highscore_text = self.score_font.render(LocaleManager.getString("highscore") + str(game.getHighScore()), True, (0,0,0))
+        
         self.screen.blit(self.bg,(0,0))
-        updates = self.sprites.draw(self.screen)
-        pygame.display.update(updates)
+        self.screen.blit(score_text,(5,5))
+        self.screen.blit(highscore_text,(self.screen_size[0]-highscore_text.get_rect().width-5,5))
+
+        # Update display of the frame
+        self.sprites.draw(self.screen)
+        pygame.display.update()
     
         
 
