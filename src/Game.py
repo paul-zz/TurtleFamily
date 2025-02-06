@@ -1,7 +1,7 @@
 import pygame
-import src.States
 from src.AssetsLoader import AssetsLoader
 from src.LocaleManager import LocaleManager
+import src.States
 
 class Game:
     def __init__(self):
@@ -23,14 +23,12 @@ class Game:
         screen_size = (1024,768)
         screen = pygame.display.set_mode(screen_size)
 
-        # Assets Initialization
-        AssetsLoader.loadAllFromList("./assets/assetslist.yaml")
-
-        # Locale Initialization
-        LocaleManager.loadAllFromList("./assets/locale.yaml")
-
         pygame.mouse.set_visible(1)
         pygame.display.set_caption('Turtle Family')
+
+        # Load Assets and Locale
+        AssetsLoader.loadAllFromList("./assets/assetslist.yaml")
+        LocaleManager.loadAllFromList("./assets/locale.yaml")
         
         #sound initiation
         pygame.mixer.init(frequency=22050, size=-16, channels=2, buffer=512)
