@@ -20,24 +20,51 @@ class OptionBox():
         self.menu_active = False
         self.active_option = -1
 
-    def draw(self, surf):
-        pygame.draw.rect(surf, self.highlight_color if self.menu_active else self.color, self.rect)
-        pygame.draw.rect(surf, (0, 0, 0), self.rect, 2)
+    def draw(self, surf : pygame.Surface):
+        box_surf = pygame.Surface(self.rect.size, pygame.SRCALPHA)
+        box_surf.set_alpha(127)
+        pygame.draw.rect(box_surf, self.highlight_color if self.menu_active else self.color, box_surf.get_rect())
+        
         msg = self.font.render(self.option_list[self.selected], 1, (0, 0, 0))
         if msg.get_width() > self.rect.width:
             msg = self.squeeze_to_width(msg)
+        
+        blur_bg_surf = pygame.transform.gaussian_blur(surf.subsurface(self.rect), 3)
+        surf.blit(blur_bg_surf, self.rect)
+        surf.blit(box_surf, self.rect)
+        pygame.draw.rect(surf, (0, 0, 0), self.rect, 2)
         surf.blit(msg, msg.get_rect(center = self.rect.center))
         
         if self.draw_menu:
+            self.outer_rect = pygame.Rect(self.rect.x, self.rect.y + self.rect.height, self.rect.width, self.rect.height * len(self.option_list))
+            
+            
+            surf_outer_option = pygame.Surface(self.rect.size, pygame.SRCALPHA)
+            surf_outer_option.set_alpha(127)
+
+            blur_outer_bg_surf = pygame.transform.gaussian_blur(surf.subsurface(self.outer_rect), 3)
+            surf.blit(blur_outer_bg_surf, self.outer_rect)
+            
+            rect_font = self.outer_rect.copy()
+            rect_font.height = self.rect.height
+
+            rect_option = surf_outer_option.get_rect().copy()
+            rect_option.x = self.outer_rect.x
+            rect_option.y = self.outer_rect.y
+
             for i, text in enumerate(self.option_list):
-                rect = self.rect.copy()
-                rect.y += (i+1) * self.rect.height
-                pygame.draw.rect(surf, self.highlight_color if i == self.active_option else self.color, rect)
+                pygame.draw.rect(surf_outer_option, self.highlight_color if i == self.active_option else self.color, surf_outer_option.get_rect())
+                surf.blit(surf_outer_option, rect_option)
+                
                 msg = self.font.render(text, 1, (0, 0, 0))
+
                 if msg.get_width() > self.rect.width:
                     msg = self.squeeze_to_width(msg)
-                surf.blit(msg, msg.get_rect(center = rect.center))
-            self.outer_rect = (self.rect.x, self.rect.y + self.rect.height, self.rect.width, self.rect.height * len(self.option_list))
+                surf.blit(msg, msg.get_rect(center = rect_font.center))
+
+                rect_font.y += self.rect.height
+                rect_option.y += rect_option.height
+            
             pygame.draw.rect(surf, (0, 0, 0), self.outer_rect, 2)
         return [self.rect, self.outer_rect]
     
