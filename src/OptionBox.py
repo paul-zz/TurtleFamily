@@ -20,16 +20,21 @@ class OptionBox():
         self.menu_active = False
         self.active_option = -1
 
+        # Appearance
+        self.enableBlur = True
+        self.blurRadius = 5
+        self.alpha = 127
+
     def draw(self, surf : pygame.Surface):
         box_surf = pygame.Surface(self.rect.size, pygame.SRCALPHA)
-        box_surf.set_alpha(127)
+        box_surf.set_alpha(self.alpha)
         pygame.draw.rect(box_surf, self.highlight_color if self.menu_active else self.color, box_surf.get_rect())
         
         msg = self.font.render(self.option_list[self.selected], 1, (0, 0, 0))
         if msg.get_width() > self.rect.width:
             msg = self.squeeze_to_width(msg)
         
-        blur_bg_surf = pygame.transform.gaussian_blur(surf.subsurface(self.rect), 3)
+        blur_bg_surf = pygame.transform.gaussian_blur(surf.subsurface(self.rect), self.blurRadius)
         surf.blit(blur_bg_surf, self.rect)
         surf.blit(box_surf, self.rect)
         pygame.draw.rect(surf, (0, 0, 0), self.rect, 2)
@@ -38,11 +43,10 @@ class OptionBox():
         if self.draw_menu:
             self.outer_rect = pygame.Rect(self.rect.x, self.rect.y + self.rect.height, self.rect.width, self.rect.height * len(self.option_list))
             
-            
             surf_outer_option = pygame.Surface(self.rect.size, pygame.SRCALPHA)
-            surf_outer_option.set_alpha(127)
+            surf_outer_option.set_alpha(self.alpha)
 
-            blur_outer_bg_surf = pygame.transform.gaussian_blur(surf.subsurface(self.outer_rect), 3)
+            blur_outer_bg_surf = pygame.transform.gaussian_blur(surf.subsurface(self.outer_rect), self.blurRadius)
             surf.blit(blur_outer_bg_surf, self.outer_rect)
             
             rect_font = self.outer_rect.copy()
@@ -83,12 +87,8 @@ class OptionBox():
         self.menu_active = self.rect.collidepoint(mpos)
         
         self.active_option = -1
-        for i in range(len(self.option_list)):
-            rect = self.rect.copy()
-            rect.y += (i+1) * self.rect.height
-            if rect.collidepoint(mpos):
-                self.active_option = i
-                break
+        if self.outer_rect and self.outer_rect.collidepoint(mpos):
+            self.active_option = int((mpos[1] - self.outer_rect.y) / self.rect.height)
 
         if not self.menu_active and self.active_option == -1:
             self.draw_menu = False
