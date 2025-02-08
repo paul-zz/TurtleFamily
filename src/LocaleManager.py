@@ -13,6 +13,10 @@ class LocaleManager:
         # Set current locale by a given locale index according to the locale list(e.g. 0)
         LocaleManager.locale_idx = locale_idx
 
+    def setFallback(locale_idx : int):
+        # Set current locale by a given locale index according to the locale list(e.g. 0)
+        LocaleManager.fallback_idx = locale_idx
+
     def loadLocale(locale_name : str,  locale_dir : str):
         # Load locale strings from local file
         with open(locale_dir, "r", encoding="utf-8") as f:
