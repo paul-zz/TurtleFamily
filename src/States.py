@@ -27,6 +27,15 @@ class State:
         # screen.blit(bg,(0,0))
         # pygame.display.flip()
 
+    def wait_ms(self, time_ms : int):
+        time_now = pygame.time.get_ticks()
+        time_end = time_now + time_ms
+
+        while time_now < time_end:
+            for event in pygame.event.get():
+                if event.type== pygame.QUIT: 
+                    sys.exit()
+            time_now = pygame.time.get_ticks()
 
 class Paused(State):
     finished = 0
@@ -147,7 +156,7 @@ class Level(State):
                         updates.append(self.screen.blit(text_bonus_banner,r))
                         updates.append(self.screen.blit(text_bonus,r2))
                         pygame.display.update(updates)
-                        pygame.time.delay(1000)
+                        self.wait_ms(1000)
                     self.layer += 1
                     self.turtlelst.append(Turtle(self.screen))
                     self.sprites.add(self.turtlelst[-1])
@@ -224,7 +233,7 @@ class Instruction(Paused):
         if audio:
             audio.play()
         # Delay time to display the instruction page
-        pygame.time.delay(delay)
+        self.wait_ms(delay)
     
     def update(self, game):
         if self.finished:
@@ -279,6 +288,8 @@ class GameOver(Paused):
         pygame.display.flip()
 
     def handle(self, event):
+        if event.type == pygame.QUIT:
+            sys.exit()
         if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
             self.return_to_home = True
         if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
