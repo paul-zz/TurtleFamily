@@ -45,6 +45,11 @@ class AssetsLoader:
         # Load sound from local file as pygame mixer sound object
         AssetsLoader.sound_dict[name] = pygame.mixer.Sound(sound_dir)
 
+    def setSoundVolume(vol : float):
+        # Set sound volume for all sounds in the dict
+        for k,v in AssetsLoader.sound_dict.items():
+            v.set_volume(vol)
+
     def loadAllFromList(asset_list_dir : str):
         # Load all the resources from a asset list (yaml file)
         with open(asset_list_dir, "r") as f:
