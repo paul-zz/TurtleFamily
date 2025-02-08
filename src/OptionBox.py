@@ -100,4 +100,4 @@ class OptionBox():
                 self.selected = self.active_option
                 self.draw_menu = False
                 return self.active_option
-        return -1
+        return self.selected
