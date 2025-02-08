@@ -1,6 +1,7 @@
 import pygame
+from .UIElements import UIElements
 
-class Gauge():
+class Gauge(UIElements):
 
     def __init__(self, x, y, w, h, 
                  color, 
@@ -10,24 +11,18 @@ class Gauge():
                  max_val,  
                  show_text = True,
                  font = pygame.font.get_default_font()):
+        super().__init__(pygame.Rect(x, y, w, h))
         self.color = color
         self.filled_color = filled_color
-        self.rect = pygame.Rect(x, y, w, h)
-        self.outer_rect = None
         self.min_val = min_val
         self.max_val = max_val
         self.curr_val = min(max(min_val, curr_val), max_val)
 
         self.show_text = show_text
         self.font = font
-        self.draw_menu = False
         self.mouse_on = False
         self.drag = False
-
-        # Appearance
-        self.enableBlur = True
-        self.blurRadius = 5
-        self.alpha = 127
+        
 
     def draw(self, surf : pygame.Surface):
         box_surf = pygame.Surface(self.rect.size, pygame.SRCALPHA)
@@ -44,8 +39,9 @@ class Gauge():
             if msg.get_width() > self.rect.width:
                 msg = self.squeeze_to_width(msg)
         
-        blur_bg_surf = pygame.transform.gaussian_blur(surf.subsurface(self.rect), self.blurRadius)
-        surf.blit(blur_bg_surf, self.rect)
+        if self.enableBlur:
+            self.draw_blur_layer(surf, self.rect)
+
         surf.blit(box_surf, self.rect)
 
         pygame.draw.rect(surf, (0, 0, 0), self.rect, 2)
@@ -53,16 +49,6 @@ class Gauge():
             surf.blit(msg, msg.get_rect(center = self.rect.center))
 
         return self.rect
-    
-    def fit_to_width(self, surf, proportion = 0.85):
-        # Fit the text to the same width of the rect
-        scale = proportion * self.rect.width / surf.get_width()
-        surf = pygame.transform.scale(surf, (surf.get_width() * scale, surf.get_height() * scale))
-        return surf
-    
-    def squeeze_to_width(self, surf, proportion = 0.85):
-        surf = pygame.transform.scale(surf, (self.rect.width * proportion, surf.get_height()))
-        return surf
 
     def update(self, event):
         mpos = pygame.mouse.get_pos()

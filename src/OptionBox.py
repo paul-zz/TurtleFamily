@@ -5,13 +5,14 @@ Author:
 Rabbid76
 """
 import pygame
+from .UIElements import UIElements
 
-class OptionBox():
+class OptionBox(UIElements):
 
     def __init__(self, x, y, w, h, color, highlight_color, font, option_list, selected = 0):
+        super().__init__(pygame.Rect(x, y, w, h))
         self.color = color
         self.highlight_color = highlight_color
-        self.rect = pygame.Rect(x, y, w, h)
         self.outer_rect = None
         self.font = font
         self.option_list = option_list
@@ -19,11 +20,6 @@ class OptionBox():
         self.draw_menu = False
         self.menu_active = False
         self.active_option = -1
-
-        # Appearance
-        self.enableBlur = True
-        self.blurRadius = 5
-        self.alpha = 127
 
     def draw(self, surf : pygame.Surface):
         box_surf = pygame.Surface(self.rect.size, pygame.SRCALPHA)
@@ -34,8 +30,9 @@ class OptionBox():
         if msg.get_width() > self.rect.width:
             msg = self.squeeze_to_width(msg)
         
-        blur_bg_surf = pygame.transform.gaussian_blur(surf.subsurface(self.rect), self.blurRadius)
-        surf.blit(blur_bg_surf, self.rect)
+        if self.enableBlur:
+            self.draw_blur_layer(surf, self.rect)
+
         surf.blit(box_surf, self.rect)
         pygame.draw.rect(surf, (0, 0, 0), self.rect, 2)
         surf.blit(msg, msg.get_rect(center = self.rect.center))
@@ -46,8 +43,8 @@ class OptionBox():
             surf_outer_option = pygame.Surface(self.rect.size, pygame.SRCALPHA)
             surf_outer_option.set_alpha(self.alpha)
 
-            blur_outer_bg_surf = pygame.transform.gaussian_blur(surf.subsurface(self.outer_rect), self.blurRadius)
-            surf.blit(blur_outer_bg_surf, self.outer_rect)
+            if self.enableBlur:
+                self.draw_blur_layer(surf, self.outer_rect)
             
             rect_font = self.outer_rect.copy()
             rect_font.height = self.rect.height
@@ -71,16 +68,6 @@ class OptionBox():
             
             pygame.draw.rect(surf, (0, 0, 0), self.outer_rect, 2)
         return [self.rect, self.outer_rect]
-    
-    def fit_to_width(self, surf, proportion = 0.85):
-        # Fit the text to the same width of the rect
-        scale = proportion * self.rect.width / surf.get_width()
-        surf = pygame.transform.scale(surf, (surf.get_width() * scale, surf.get_height() * scale))
-        return surf
-    
-    def squeeze_to_width(self, surf, proportion = 0.85):
-        surf = pygame.transform.scale(surf, (self.rect.width * proportion, surf.get_height()))
-        return surf
 
     def update(self, event):
         mpos = pygame.mouse.get_pos()
