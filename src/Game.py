@@ -3,7 +3,9 @@ from src.AssetsLoader import AssetsLoader
 from src.LocaleManager import LocaleManager
 import src.States
 
+
 class Game:
+
     def __init__(self):
         self.state = None
         self.nextState = None
@@ -29,6 +31,7 @@ class Game:
         # Load Assets and Locale
         AssetsLoader.loadAllFromList("./assets/assetslist.yaml")
         LocaleManager.loadAllFromList("./assets/locale.yaml")
+        LocaleManager.setFallback(3) # Set en-us as fallback
         
         #sound initiation
         pygame.mixer.init(frequency=22050, size=-16, channels=2, buffer=512)
