@@ -4,7 +4,7 @@ block_cipher = None
 
 
 a = Analysis(['game.py'],
-             pathex=['F:\\ProgramLearn\\我的坚果云\\TurtleFamily'],
+             pathex=['F:\\ProgramLearn\\Python\\NewTurtleGame\\TurtleFamily'],
              binaries=[],
              datas=[],
              hiddenimports=[],
