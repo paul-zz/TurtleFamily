@@ -1,5 +1,7 @@
 import sys
 import pygame
+import webbrowser
+
 from pygame.math import Vector2
 
 from .Turtle import Turtle
@@ -8,6 +10,10 @@ from .Camera import Camera
 from .AssetsLoader import AssetsLoader
 from .LocaleManager import LocaleManager
 from .OptionBox import OptionBox
+from .PushButton import PushButton
+from .SwitchButton import SwitchButton
+from .LabelBox import LabelBox
+from .Gauge import Gauge
 
 class State:
     def handle(self,event):
@@ -69,15 +75,22 @@ class Level(State):
         self.show_score_addition = False
         self.time_end = 0
 
+        self.back_to_home = False
+
     def handle(self,event):
         if event.type== pygame.QUIT: 
             sys.exit()
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+            self.back_to_home = True
         if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
             self.touchsound.play()
             self.turtlelst[-1].drop_flag = True
 
     def update(self, game):
         # Update all sprites
+        if self.back_to_home:
+            game.nextState = Homepage(self.screen)
+
         self.sprites.update()
         
         if self.firstTurtle.collide(self.ground) and not self.firstTurtle.frozen:
@@ -274,13 +287,15 @@ class Homepage(State):
     def __init__(self, screen : pygame.Surface):
         self.screen = screen
         self.finished = False
-        self.list1 = OptionBox(
-    880, 40, 100, 30, (255, 255, 255), (100, 200, 255), AssetsLoader.getFont("score_font"), 
-    LocaleManager.getAllNames())
+        self.button_settings = PushButton(
+    942, 42, 40, 40, (255, 255, 255), (100, 200, 255), AssetsLoader.getFont("score_font"), 
+    " ")
+        self.label_version = LabelBox(842, 42, 100, 40, "v 1.4.0", show_border=True, font = AssetsLoader.getFont("score_font"))
         self.font_big = AssetsLoader.getFont("bigfont")
         self.font_mid = AssetsLoader.getFont("midfont")
         self.bg = AssetsLoader.getImage("background")
-        self.icon_earth = AssetsLoader.getImage("icon_earth")
+        self.icon_settings = AssetsLoader.getImage("icon_settings")
+        self.btn_set_pressed = False
 
     def firstDisplay(self, screen : pygame.Surface):
         # Display only once when the state is created
@@ -290,7 +305,7 @@ class Homepage(State):
         # Function to refresh the titles once
         # Trigger only when the titles are changed
         self.screen.blit(self.bg, (0, 0))
-        self.screen.blit(self.icon_earth, (840, 39))
+
         # Draw the title
         height = self.font_big.get_linesize()
         center, top = self.screen.get_rect().center
@@ -306,7 +321,9 @@ class Homepage(State):
         r2 = text.get_rect()
         r2.midtop = center,top
         self.screen.blit(text, r2)
-        self.list1.draw(self.screen)
+        self.button_settings.draw(self.screen)
+        self.label_version.draw(self.screen)
+        self.screen.blit(self.icon_settings, (950, 50))
         pygame.display.update()
 
     def handle(self, event):
@@ -316,16 +333,144 @@ class Homepage(State):
             sys.exit()
         if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
             self.finished = 1
-        selected_option = self.list1.update(event)
-        if selected_option >=0:
-            # Set locale and refresh the titles
-            LocaleManager.setLocale(selected_option)
-            self.refreshOnce()
+        self.btn_set_pressed = self.button_settings.update(event)
+        
 
     def update(self, game):
         # Clear the background
         self.screen.blit(self.bg, (0, 0))
-        updates = self.list1.draw(self.screen)
+        updates = self.button_settings.draw(self.screen)
+        self.screen.blit(self.icon_settings, (950, 50))
         pygame.display.update(updates)
+        if self.btn_set_pressed:
+            game.nextState = Settings(self.screen)
+            self.btn_set_pressed = False
         if self.finished:
             game.nextState = Instruction(self.screen)
+
+class Settings(State):
+    def __init__(self, screen : pygame.Surface):
+        self.screen = screen
+        self.font_big = AssetsLoader.getFont("bigfont")
+        self.font_mid = AssetsLoader.getFont("midfont")
+        self.bg = AssetsLoader.getImage("background")
+
+        self.finished = False
+
+        self.status_confirmed = False
+
+        # Init elements
+
+        self.label_locale = LabelBox(50, 100, 200, 50, LocaleManager.getString("language"), show_border = False, font=AssetsLoader.getFont("score_font"))
+
+        self.list1 = OptionBox(
+    300, 100, 350, 50, (255, 255, 255), (100, 200, 255), AssetsLoader.getFont("score_font"), LocaleManager.getAllNames())
+        
+        self.label_bgm = LabelBox(50, 200, 200, 50, LocaleManager.getString("bgm_volume"), show_border = False, font=AssetsLoader.getFont("score_font"))
+
+        self.btn_switch = SwitchButton(
+    300, 200, 100, 50, (255, 255, 255), (100, 200, 255), AssetsLoader.getFont("score_font"), 
+    LocaleManager.getString("on"), LocaleManager.getString("off"), True)
+        
+        self.gauge1 = Gauge(
+    400, 200, 600, 50, (255, 255, 255), (100, 200, 255), 50, 0, 100, True, AssetsLoader.getFont("score_font"))
+        
+        self.label_sfx = LabelBox(50, 300, 200, 50, LocaleManager.getString("sfx_volume"), show_border = False, font=AssetsLoader.getFont("score_font"))
+
+        self.btn_switch2 = SwitchButton(
+    300, 300, 100, 50, (255, 255, 255), (100, 200, 255), AssetsLoader.getFont("score_font"), 
+    LocaleManager.getString("on"), LocaleManager.getString("off"), True)
+        
+        self.gauge2 = Gauge(
+    400, 300, 600, 50, (255, 255, 255), (100, 200, 255), 50, 0, 100, True, AssetsLoader.getFont("score_font"))
+        
+        self.label_gameinfo = LabelBox(50, 400, 200, 50, LocaleManager.getString("game_info"), show_border = False, font=AssetsLoader.getFont("score_font"))
+
+        self.btn_get_latest = PushButton(
+    300, 400, 350, 50, (255, 255, 255), (100, 200, 255), AssetsLoader.getFont("score_font"), LocaleManager.getString("get_latest"))
+        
+        self.btn_view_gh = PushButton(
+    650, 400, 350, 50, (255, 255, 255), (100, 200, 255), AssetsLoader.getFont("score_font"), LocaleManager.getString("goto_github"))
+        
+        self.btn_ok = PushButton(
+    0, 718, 512, 50, (255, 255, 255), (100, 200, 255), AssetsLoader.getFont("score_font"), LocaleManager.getString("confirm"))
+        
+        self.btn_cancel = PushButton(
+    512, 718, 512, 50, (255, 255, 255), (100, 200, 255), AssetsLoader.getFont("score_font"), LocaleManager.getString("cancel"))
+        
+        self.title = LabelBox(0, 0, 1024, 80, LocaleManager.getString("settings"), show_border = False, font=AssetsLoader.getFont("midfont"))
+
+    def firstDisplay(self, screen : pygame.Surface):
+        # Display only once when the state is created
+        self.screen.blit(self.bg, (0, 0))
+        pygame.display.flip()
+    
+
+    def handle(self, event):
+        if event.type == pygame.QUIT:
+            sys.exit()
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+            sys.exit()
+        selected_option = self.list1.update(event)
+        btn_ok_pressed = self.btn_ok.update(event)
+        btn_cancel_pressed = self.btn_cancel.update(event)
+        btn_switch_on = self.btn_switch.update(event)
+        btn_switch2_on = self.btn_switch2.update(event)
+        gauge_curr_val = self.gauge1.update(event)
+        gauge2_curr_val = self.gauge2.update(event)
+
+        btn_get_latest_pressed = self.btn_get_latest.update(event)
+        btn_view_gh_pressed = self.btn_view_gh.update(event)
+
+        if btn_ok_pressed:
+            LocaleManager.setLocale(selected_option)
+            if btn_switch_on:
+                pygame.mixer.music.set_volume(gauge_curr_val/100)
+            else:
+                pygame.mixer.music.set_volume(0)
+            if btn_switch2_on:
+                AssetsLoader.setSoundVolume(gauge2_curr_val/100)
+            else:
+                AssetsLoader.setSoundVolume(0)
+
+            self.status_confirmed = True
+            
+        if btn_cancel_pressed:
+            self.status_confirmed = True
+
+        if btn_get_latest_pressed:
+            webbrowser.open("https://github.com/paul-zz/TurtleFamily/releases")
+
+        if btn_view_gh_pressed:
+            webbrowser.open("https://github.com/paul-zz/TurtleFamily")
+
+
+    def update(self, game):
+        # Clear the background
+        self.screen.blit(self.bg, (0, 0))
+
+        updates = [self.btn_ok.draw(self.screen)]
+        updates.append(self.btn_cancel.draw(self.screen))
+
+        updates.append(self.label_locale.draw(self.screen))
+
+        updates.append(self.label_bgm.draw(self.screen))
+        updates.append(self.btn_switch.draw(self.screen))
+        updates.append(self.gauge1.draw(self.screen))
+
+        updates.append(self.label_sfx.draw(self.screen))
+        updates.append(self.btn_switch2.draw(self.screen))
+        updates.append(self.gauge2.draw(self.screen))
+
+        updates.append(self.label_gameinfo.draw(self.screen))
+        updates.append(self.btn_get_latest.draw(self.screen))
+        updates.append(self.btn_view_gh.draw(self.screen))
+
+        updates.append(self.title.draw(self.screen))
+        
+        updates.extend(self.list1.draw(self.screen))
+        pygame.display.update(updates)
+
+        if self.status_confirmed:
+            game.nextState = Homepage(self.screen)
+            self.status_confirmed = False
