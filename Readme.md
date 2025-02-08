@@ -15,4 +15,6 @@ Space bar is the only available control key in this game. Simply press it to sta
 ## Notices 说明
 All of the images and audio sources are from the internet. If violated, please contact me to delete.
 
+<a href="https://www.flaticon.com/free-icons/settings" title="settings icons">Settings icons created by Pixel perfect - Flaticon</a>
+
 项目图像及音频素材均来源于网络，如有侵权，请告知删除。
