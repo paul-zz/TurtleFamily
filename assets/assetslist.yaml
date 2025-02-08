@@ -8,6 +8,7 @@ images:
   - ground : "./assets/images/ground.png"
   - background : "./assets/images/bg.png"
   - icon_earth : "./assets/images/earth.png"
+  - icon_settings : "./assets/images/sett.png"
 sounds:
   - niceshot_1 : "./assets/sounds/liupi.wav"
   - niceshot_2 : "./assets/sounds/666.wav"
