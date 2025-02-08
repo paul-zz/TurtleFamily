@@ -30,9 +30,7 @@ class State:
 
 class Paused(State):
     finished = 0
-    image = None
-    text = ''
-
+    
     def handle(self, event):
         State.handle(self, event)
         if event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.KEYDOWN:
@@ -243,6 +241,8 @@ class GameOver(Paused):
         self.sound_fail = AssetsLoader.getSound("fail")
         self.sound_newbest = AssetsLoader.getSound("newbest")
 
+        self.return_to_home = False
+
     def firstDisplay(self, screen : pygame.Surface):
         # Update the highscore
         highscore = self.game.getHighScore()
@@ -278,9 +278,17 @@ class GameOver(Paused):
         screen.blit(text, r2)
         pygame.display.flip()
 
+    def handle(self, event):
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+            self.return_to_home = True
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+            self.finished = 1
+
     def update(self, game):
         if self.finished:
             game.nextState = Level(self.screen)
+        if self.return_to_home:
+            game.nextState = Homepage(self.screen)
 
 
 class Homepage(State):
